@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "dev": "concurrently -n WEB,API,AI -c blue,green,yellow \"pnpm --filter web dev\" \"pnpm --filter api dev\" \"pnpm --filter ai dev\"",
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "pnpm --filter api dev",
+    "dev:ai": "pnpm --filter ai dev",
+    "train": "pnpm --filter ai train",
+    "generate": "pnpm --filter @skripsi/db db:generate",
+    "migrate": "pnpm --filter @skripsi/db db:migrate",
+    "studio": "pnpm --filter @skripsi/db db:studio",
+    "setup": "pnpm run generate && pnpm run train",
+    "start:all": "pnpm run setup && pnpm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
+}

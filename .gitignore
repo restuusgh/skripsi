@@ -1,0 +1,29 @@
+# Dependencies
+**/node_modules/
+
+# Environment
+**/.env
+**/.env.*
+
+# Build
+**/dist/
+**/build/
+
+# Logs
+*.log
+pnpm-debug.log*
+npm-debug.log*
+
+# Prisma
+**/prisma/dev.db
+**/prisma/dev.db-journal
+
+# VS Code
+.vscode/
+
+# JetBrains
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

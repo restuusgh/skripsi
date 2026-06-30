@@ -1,0 +1,205 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+enum Role {
+  ADMIN
+  PIMPINAN
+}
+
+enum StatusUser {
+  AKTIF
+  NONAKTIF
+}
+
+enum StatusDistribusi {
+  PROSES
+  SELESAI
+  DIBATALKAN
+}
+
+enum TipeAI {
+  kebutuhan
+  stok
+}
+
+
+
+model User {
+  id        Int        @id @default(autoincrement())
+  nama      String
+  email     String     @unique
+  password  String
+  role      Role       @default(ADMIN)
+  status    StatusUser @default(AKTIF)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  distribusi   Distribusi[]
+  aktivitasLog AktivitasLog[]
+  laporan      Laporan[]
+  notifikasi   Notifikasi[]
+
+  @@map("users")
+}
+
+model Produk {
+  id          Int      @id @default(autoincrement())
+  namaProduk  String
+  jenisProduk String
+  satuan      String
+  deskripsi   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  stok             Stok?
+  detailDistribusi DetailDistribusi[]
+  prediksiStok     PrediksiStok[]
+
+  @@map("produk")
+}
+
+model Stok {
+  id            Int      @id @default(autoincrement())
+  produkId      Int      @unique
+  jumlahStok    Decimal  @db.Decimal(10, 2)
+  minimalStok   Decimal  @db.Decimal(10, 2)
+  tanggalUpdate DateTime @default(now()) @updatedAt
+
+  produk Produk @relation(fields: [produkId], references: [id])
+
+  @@map("stok")
+}
+
+model TujuanDistribusi {
+  id         Int     @id @default(autoincrement())
+  namaTujuan String
+  alamat     String
+  kontak     String?
+
+  distribusi Distribusi[]
+
+  @@map("tujuan_distribusi")
+}
+
+model Kendaraan {
+  id        Int     @id @default(autoincrement())
+  platNomor String  @unique
+  namaSupir String
+  kapasitas Decimal @db.Decimal(10, 2)
+  status    String  @default("tersedia")
+
+  distribusi Distribusi[]
+
+  @@map("kendaraan")
+}
+
+model Distribusi {
+  id                Int              @id @default(autoincrement())
+  kodeDistribusi    String           @unique
+  nomorSuratJalan   String?
+  tanggalDistribusi DateTime
+  tujuanDistribusiId Int
+  kendaraanId       Int?
+  createdBy         Int
+  status            StatusDistribusi @default(PROSES)
+  keterangan        String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  tujuanDistribusi TujuanDistribusi @relation(fields: [tujuanDistribusiId], references: [id])
+  kendaraan        Kendaraan?       @relation(fields: [kendaraanId], references: [id])
+  user             User             @relation(fields: [createdBy], references: [id])
+  detailDistribusi DetailDistribusi[]
+
+  @@map("distribusi")
+}
+
+model DetailDistribusi {
+  id           Int     @id @default(autoincrement())
+  distribusiId Int
+  produkId     Int
+  jumlah       Decimal @db.Decimal(10, 2)
+
+  distribusi Distribusi @relation(fields: [distribusiId], references: [id])
+  produk     Produk     @relation(fields: [produkId], references: [id])
+
+  @@map("detail_distribusi")
+}
+
+model AktivitasLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  aktivitas String
+  deskripsi String?
+  tanggal   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("aktivitas_log")
+}
+
+model Laporan {
+  id           Int      @id @default(autoincrement())
+  judulLaporan String
+  jenisLaporan String
+  periode      String
+  tanggalCetak DateTime @default(now())
+  userId       Int
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("laporan")
+}
+
+model Notifikasi {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  judul      String
+  pesan      String
+  statusBaca Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("notifikasi")
+}
+
+
+
+model PrediksiStok {
+  id            Int      @id @default(autoincrement())
+  produkId      Int
+  periode       String   // format: "2025-01"
+  hasilPrediksi Decimal  @db.Decimal(10, 2)
+  metode        String   // "brain.js-neural-network"
+  nilaiAkurasi  Decimal? @db.Decimal(5, 2)
+  tipe          TipeAI   // "kebutuhan" | "stok"  ← BARU
+  createdAt     DateTime @default(now())
+
+  produk            Produk          @relation(fields: [produkId], references: [id])
+  hasilPrediksiDetail HasilPrediksi[]
+
+  @@map("prediksi_stok")
+}
+
+model HasilPrediksi {
+  id             Int      @id @default(autoincrement())
+  prediksiStokId Int
+  bulan          String   // "Jan 2025"
+  nilaiPrediksi  Decimal  @db.Decimal(10, 2)
+  tipe           TipeAI   // "kebutuhan" | "stok"  ← BARU
+  inputData      String?  @db.Text               // JSON string input  ← BARU
+  createdAt      DateTime @default(now())         // ← BARU
+
+  prediksiStok PrediksiStok @relation(fields: [prediksiStokId], references: [id])
+
+  @@map("hasil_prediksi")
+}

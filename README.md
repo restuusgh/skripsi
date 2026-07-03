@@ -1,119 +1,110 @@
-# 🌴 Palm Oil Distribution Information System with AI
+# Palm Oil Distribution Information System with AI
 
-An intelligent web-based **Palm Oil Distribution Information System** built using **Full Stack JavaScript**.  
-This project helps manage distribution data, monitor stock, generate reports, and predict future distribution demand using **Artificial Neural Network (Brain.js)**.
+A web-based information system for managing palm oil distribution, built with a full-stack JavaScript architecture. The system supports distribution data management, stock monitoring, report generation, and demand forecasting powered by an Artificial Neural Network implemented with Brain.js.
 
 ---
 
-## 📸 Preview
-
-> Add your screenshots here
+## Preview
 
 | Dashboard | AI Prediction |
-|-----------|---------------|
-| ![](docs/dashboard.png) | ![](docs/prediction.png) |
+|-----------|----------------|
+| ![Dashboard](docs/dashboard.png) | ![AI Prediction](docs/prediction.png) |
 
 ---
 
-# ✨ Features
+## Table of Contents
 
-## 📦 Product Management
-
-- Manage products
-- Product stock management
-- Minimum stock monitoring
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Environment Variables](#environment-variables)
+- [Database Setup](#database-setup)
+- [Running the Application](#running-the-application)
+- [AI Workflow](#ai-workflow)
+- [Prediction Parameters](#prediction-parameters)
+- [Neural Network Design](#neural-network-design)
+- [Database Schema](#database-schema)
+- [API Reference](#api-reference)
+- [Research Background](#research-background)
+- [Author](#author)
+- [License](#license)
 
 ---
 
-## 🚚 Distribution Management
+## Features
 
-- Create distribution records
-- Distribution history
+### Product Management
+- Product data management
+- Stock level tracking
+- Minimum stock threshold alerts
+
+### Distribution Management
+- Distribution record creation
+- Distribution history tracking
 - Destination management
 - Vehicle management
 - Delivery status tracking
 
----
-
-## 📊 Dashboard
-
-- Total distribution
-- Current stock
+### Dashboard
+- Total distribution overview
+- Real-time stock levels
 - Product statistics
-- Distribution activity
-- Monitoring overview
+- Distribution activity summary
+- General monitoring overview
 
----
+### AI Prediction
 
-## 🤖 AI Prediction
+Powered by a Brain.js neural network, providing:
 
-Powered by **Brain.js Neural Network**
-
-Features:
-
-- Distribution prediction
-- Stock prediction
+- Distribution demand forecasting
+- Stock level forecasting
 - Historical trend analysis
-- Prediction history
-- Database-based automatic input
+- Prediction history logging
+- Automatic input generation from database records
 
-Supports prediction for:
-
+Supported commodities:
 - Crude Palm Oil (CPO)
 - Cooking Oil
 
-Prediction period:
+Prediction horizons:
+- One month ahead
+- Two months ahead
 
-- 1 Month Ahead
-- 2 Months Ahead
-
----
-
-## 📈 Reports
-
+### Reports
 - Distribution reports
 - Stock reports
-- Export-ready reports
+- Export-ready output formats
+
+### User Management
+- Admin role
+- Management role
 
 ---
 
-## 👥 User Management
+## Tech Stack
 
-- Admin
-- Management
-
----
-
-# 🛠 Tech Stack
-
-## Frontend
-
+**Frontend**
 - React
 - Vite
-- TailwindCSS
+- Tailwind CSS
 - Framer Motion
 - Recharts
 - Lucide React
 
----
-
-## Backend
-
+**Backend**
 - Node.js
 - Express.js
 - Prisma ORM
 - PostgreSQL
 
----
-
-## Artificial Intelligence
-
+**Artificial Intelligence**
 - Brain.js
 - Neural Network
 
 ---
 
-# 📁 Project Structure
+## Project Structure
 
 ```
 skripsi/
@@ -133,17 +124,16 @@ skripsi/
 
 ---
 
-# 🚀 Installation
+## Installation
 
-Clone repository
+Clone the repository:
 
 ```bash
 git clone https://github.com/yourusername/your-repository.git
-
 cd your-repository
 ```
 
-Install dependencies
+Install dependencies:
 
 ```bash
 pnpm install
@@ -151,9 +141,9 @@ pnpm install
 
 ---
 
-# ⚙ Environment Variables
+## Environment Variables
 
-Create `.env`
+Create a `.env` file in the project root:
 
 ```
 DATABASE_URL="postgresql://postgres:password@localhost:5432/skripsi_db"
@@ -161,21 +151,21 @@ DATABASE_URL="postgresql://postgres:password@localhost:5432/skripsi_db"
 
 ---
 
-# 🗄 Database
+## Database Setup
 
-Generate Prisma Client
+Generate the Prisma client:
 
 ```bash
 pnpm --filter @skripsi/db db:generate
 ```
 
-Run Migration
+Run database migrations:
 
 ```bash
 pnpm --filter @skripsi/db db:migrate
 ```
 
-Seed Database
+Seed the database:
 
 ```bash
 pnpm --filter @skripsi/db db:seed
@@ -183,29 +173,29 @@ pnpm --filter @skripsi/db db:seed
 
 ---
 
-# ▶ Running Development
+## Running the Application
 
-Run everything
+Run all services together:
 
 ```bash
 pnpm dev
 ```
 
-or individually
+Or run each service individually:
 
-Frontend
+Frontend:
 
 ```bash
 pnpm --filter web dev
 ```
 
-Backend API
+Backend API:
 
 ```bash
 pnpm --filter api dev
 ```
 
-AI Server
+AI Service:
 
 ```bash
 pnpm --filter ai dev
@@ -213,65 +203,61 @@ pnpm --filter ai dev
 
 ---
 
-# 🤖 AI Workflow
+## AI Workflow
 
 ```
 Historical Distribution Data
-          │
-          ▼
-      Brain.js
- Neural Network Training
-          │
-          ▼
- Distribution Prediction
-          │
-          ▼
- Stock Prediction
+            |
+            v
+    Brain.js Neural Network
+         Training
+            |
+            v
+  Distribution Prediction
+            |
+            v
+      Stock Prediction
 ```
 
 ---
 
-# 📊 AI Prediction Parameters
+## Prediction Parameters
 
-Distribution Prediction
-
-- Current Stock
-- Previous Month Demand
-- Distribution Area
+**Distribution Prediction**
+- Current stock
+- Previous month demand
+- Distribution area
 - Season
-- Product Type
-- Prediction Period
+- Product type
+- Prediction period
 
-Stock Prediction
-
-- Current Stock
-- Estimated Production
-- Previous Demand
-- Product Price
+**Stock Prediction**
+- Current stock
+- Estimated production
+- Previous demand
+- Product price
 
 ---
 
-# 🧠 Neural Network
+## Neural Network Design
 
-This project uses **Brain.js Neural Network** for prediction.
+This project uses a Brain.js neural network for forecasting.
 
-Input Variables
-
+**Input Variables**
 - Stock
 - Demand
 - Area
 - Season
 
-Output
-
-- Distribution Prediction
-- Future Stock Prediction
+**Output Variables**
+- Distribution prediction
+- Future stock prediction
 
 ---
 
-# 🗃 Database
+## Database Schema
 
-Main Tables
+Core tables include:
 
 - Users
 - Products
@@ -288,99 +274,62 @@ Main Tables
 
 ---
 
-# 📌 API
+## API Reference
 
-## Prediction
+### Prediction Endpoints
 
-```
-GET /api/prediksi/konteks
-
-POST /api/prediksi/kebutuhan
-
-POST /api/prediksi/stok
-
-GET /api/prediksi/tren
-
-GET /api/prediksi/riwayat
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/prediksi/konteks` | Retrieve prediction context data |
+| POST | `/api/prediksi/kebutuhan` | Submit demand prediction request |
+| POST | `/api/prediksi/stok` | Submit stock prediction request |
+| GET | `/api/prediksi/tren` | Retrieve historical trend data |
+| GET | `/api/prediksi/riwayat` | Retrieve prediction history |
 
 ---
 
-# 📸 Screenshots
+## Screenshots
 
-## Dashboard
+Add screenshots to the `docs/` directory and reference them below:
 
-Add image here
-
-```
-docs/dashboard.png
-```
+- `docs/dashboard.png` — Dashboard overview
+- `docs/prediction.png` — AI Prediction interface
+- `docs/distribution.png` — Distribution management view
 
 ---
 
-## AI Prediction
+## Research Background
 
-Add image here
+This system was developed as an undergraduate thesis (skripsi) project.
 
-```
-docs/prediction.png
-```
-
----
-
-## Distribution
-
-Add image here
-
-```
-docs/distribution.png
-```
+**Title:**
+Design and Development of a Web-Based Palm Oil Distribution Information System with Monitoring Features, Activity Recording, and Artificial Intelligence Using JavaScript and the Waterfall Method.
 
 ---
 
-# 📖 Research
+## Author
 
-This system was developed as an undergraduate thesis project.
-
-Title:
-
-**Design and Development of a Web-Based Palm Oil Distribution Information System with Monitoring Features, Activity Recording, Artificial Intelligence Using JavaScript, and the Waterfall Method**
-
----
-
-# 👨‍💻 Author
-
-**Restu Singgih p**
-
+**Restu Singgih P.**
 Informatics Engineering
-
 Universitas Islam Nusantara
 
 ---
 
-# 📜 License
+## License
 
-This project is developed for academic purposes.
-
-Feel free to fork and learn from the project.
+This project was developed for academic purposes. It is open for forking and educational use.
 
 ---
 
-# 📌 Repository Information
+## Repository Notes
 
-This repository was created as part of an undergraduate thesis (Skripsi) project in Informatics Engineering.
+This repository was created as part of an undergraduate thesis project in Informatics Engineering. It demonstrates the design and implementation of a web-based Palm Oil Distribution Information System integrated with Artificial Intelligence (Brain.js Neural Network) for distribution and stock forecasting.
 
-The project demonstrates the design and implementation of a **Web-Based Palm Oil Distribution Information System** integrated with **Artificial Intelligence (Brain.js Neural Network)** for distribution and stock prediction.
+Intended use cases:
 
-This repository is intended for:
+- Academic research and study reference
+- Full-stack JavaScript development reference
+- AI integration reference using Brain.js
+- Software engineering portfolio demonstration
 
-- Academic research and learning purposes.
-- Full Stack JavaScript development reference.
-- Artificial Intelligence integration using Brain.js.
-- Portfolio and demonstration of software engineering skills.
-
-Some parts of this project may continue to evolve during the research process. Contributions, suggestions, and constructive feedback are always welcome.
-
----
-
-⭐ If you find this project useful, don't forget to give it a star on GitHub!
+The project may continue to evolve during the course of the research. Feedback and suggestions are welcome.

@@ -1,3 +1,4 @@
+// src/components/pages/PrediksiAi.jsx
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -15,10 +16,32 @@ import {
 const API_BASE = "http://localhost:4000/api/prediksi";
 
 const TAB_LIST = [
-  { id: "kebutuhan", label: "Prediksi Kebutuhan", Icon: BarChart3 },
+  { id: "kebutuhan", label: "Prediksi Distribusi", Icon: BarChart3 },
   { id: "stok",      label: "Prediksi Stok",      Icon: Package },
   { id: "tren",      label: "Grafik Tren",        Icon: TrendingUp },
   { id: "riwayat",   label: "Riwayat Prediksi",   Icon: History },
+];
+
+const PRODUK_OPT = [
+  {
+    label: "Crude Palm Oil (CPO)",
+    value: 1,
+  },
+  {
+    label: "Minyak Goreng",
+    value: 2,
+  },
+];
+
+const PERIODE_OPT = [
+  {
+    label: "1 Bulan ke Depan",
+    value: 1,
+  },
+  {
+    label: "2 Bulan ke Depan",
+    value: 2,
+  },
 ];
 
 const WILAYAH_OPT = [
@@ -107,7 +130,7 @@ function FromDbTag() {
 }
 
 // Hook untuk ambil konteks data (stok, permintaan, dll) dari DB
-function useKonteks() {
+function useKonteks(produkId) {
   const [konteks, setKonteks] = useState(null);
   const [loadingKonteks, setLoadingKonteks] = useState(true);
   const [errorKonteks, setErrorKonteks] = useState("");
@@ -116,7 +139,7 @@ function useKonteks() {
     setLoadingKonteks(true);
     setErrorKonteks("");
     try {
-      const res = await fetch(`${API_BASE}/konteks`);
+      const res = await fetch(`${API_BASE}/konteks?produkId=${produkId}`)
       const json = await res.json();
       if (!res.ok || !json.success) throw new Error(json.error || "Gagal memuat data dari database.");
       setKonteks(json);
@@ -127,15 +150,28 @@ function useKonteks() {
     }
   };
 
-  useEffect(() => { fetchKonteks(); }, []);
+  useEffect(() => { fetchKonteks(); }, [produkId]);
 
   return { konteks, loadingKonteks, errorKonteks, refetchKonteks: fetchKonteks };
 }
 
 // --- Tab: Prediksi Kebutuhan ---
 function TabKebutuhan({ onSaveRiwayat }) {
-  const { konteks, loadingKonteks, errorKonteks } = useKonteks();
-  const [form, setForm] = useState({ wilayah: 0, musim: 0 });
+  // ✅ FORM didefinisikan TERLEBIH DAHULU sebelum useKonteks
+  const [form, setForm] = useState({
+    produkId: 1,
+    periode: 1,
+    wilayah: 0,
+    musim: 0,
+  });
+
+  // ✅ Sekarang form sudah ada, baru panggil useKonteks
+  const {
+    konteks,
+    loadingKonteks,
+    errorKonteks
+  } = useKonteks(form.produkId);
+
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -152,11 +188,13 @@ function TabKebutuhan({ onSaveRiwayat }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          produkId: form.produkId,
+          periode: form.periode,
           wilayah: Number(form.wilayah),
           musim: Number(form.musim),
           stok: konteks.stokSaatIni,
           permintaan: konteks.permintaanBulanLalu,
-        }),
+        })
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error || "Gagal memproses prediksi.");
@@ -174,7 +212,7 @@ function TabKebutuhan({ onSaveRiwayat }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-lg">
-        <h3 className="text-base font-extrabold text-slate-100 mb-1 tracking-tight">Input Prediksi</h3>
+        <h3 className="text-base font-extrabold text-slate-100 mb-1 tracking-tight">Parameter Prediksi Distribusi</h3>
         <p className="text-sm text-slate-400 mb-5">Stok &amp; permintaan diambil otomatis dari database</p>
 
         {loadingKonteks ? (
@@ -183,9 +221,9 @@ function TabKebutuhan({ onSaveRiwayat }) {
           </div>
         ) : errorKonteks ? (
           <ErrorBanner message={errorKonteks} />
-        ) : !konteks.ada_data ? (
+        ) : !konteks?.ada_data ? (
           <div className="bg-yellow-500/10 border border-yellow-500/35 rounded-xl p-3 text-sm text-yellow-500">
-            {konteks.message}
+            {konteks?.message || "Data belum tersedia"}
           </div>
         ) : (
           <>
@@ -204,11 +242,51 @@ function TabKebutuhan({ onSaveRiwayat }) {
               value={`${fmt(konteks.permintaanBulanLalu)} ton`} />
 
             <label className="flex items-center text-xs font-semibold text-slate-300 mb-1.5 mt-3.5">
+              Produk
+            </label>
+            <select
+              className="w-full px-3 py-2.5 rounded-lg border border-slate-700 bg-slate-900 text-slate-100"
+              value={form.produkId}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  produkId: Number(e.target.value)
+                })
+              }
+            >
+              {PRODUK_OPT.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+
+            <label className="flex items-center text-xs font-semibold text-slate-300 mb-1.5 mt-3.5">
+              Periode Prediksi
+            </label>
+            <select
+              className="w-full px-3 py-2.5 rounded-lg border border-slate-700 bg-slate-900 text-slate-100"
+              value={form.periode}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  periode: Number(e.target.value)
+                })
+              }
+            >
+              {PERIODE_OPT.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+
+            <label className="flex items-center text-xs font-semibold text-slate-300 mb-1.5 mt-3.5">
               <MapPin size={13} className="mr-1.5" />Wilayah Distribusi
             </label>
             <select className="w-full px-3 py-2.5 rounded-lg border border-slate-700 bg-slate-900 text-slate-100 text-sm outline-none"
               value={form.wilayah}
-              onChange={(e) => setForm({ ...form, wilayah: e.target.value })}>
+              onChange={(e) => setForm({ ...form, wilayah: Number(e.target.value) })}>
               {WILAYAH_OPT.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
 
@@ -217,7 +295,7 @@ function TabKebutuhan({ onSaveRiwayat }) {
             </label>
             <select className="w-full px-3 py-2.5 rounded-lg border border-slate-700 bg-slate-900 text-slate-100 text-sm outline-none"
               value={form.musim}
-              onChange={(e) => setForm({ ...form, musim: e.target.value })}>
+              onChange={(e) => setForm({ ...form, musim: Number(e.target.value) })}>
               {MUSIM_OPT.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
 
@@ -277,9 +355,9 @@ function TabKebutuhan({ onSaveRiwayat }) {
 
             <div className="mt-4 grid grid-cols-2 gap-2.5">
               {[
-                { label: "Wilayah",    val: result.input.wilayahLabel },
-                { label: "Musim",      val: result.input.musimLabel  },
-                { label: "Stok (DB)",  val: `${fmt(result.input.stok)} ton` },
+                { label: "Wilayah", val: result.input.wilayahLabel },
+                { label: "Musim", val: result.input.musimLabel },
+                { label: "Stok (DB)", val: `${fmt(result.input.stok)} ton` },
                 { label: "Permintaan (DB)", val: `${fmt(result.input.permintaan)} ton` },
               ].map((item) => (
                 <div key={item.label} className="bg-slate-900 rounded-xl px-3 py-2">
@@ -304,14 +382,18 @@ function TabKebutuhan({ onSaveRiwayat }) {
 
 // --- Tab: Prediksi Stok ---
 function TabStok({ onSaveRiwayat }) {
-  const { konteks, loadingKonteks, errorKonteks } = useKonteks();
+  const [formStok, setFormStok] = useState({
+    produkId: 1,
+  });
+  
+  const { konteks, loadingKonteks, errorKonteks } = useKonteks(formStok.produkId);
   const [hargaTBS, setHargaTBS] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (konteks?.hargaTBS) setHargaTBS(String(konteks.hargaTBS));
+    if (konteks?.hargaProduk) setHargaTBS(String(konteks.hargaProduk));
   }, [konteks]);
 
   const handleSubmit = async () => {
@@ -327,6 +409,7 @@ function TabStok({ onSaveRiwayat }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          produkId: formStok.produkId,
           stok: konteks.stokSaatIni,
           produksi: konteks.produksiEstimasi,
           permintaan: konteks.permintaanBulanLalu,
@@ -360,12 +443,32 @@ function TabStok({ onSaveRiwayat }) {
           </div>
         ) : errorKonteks ? (
           <ErrorBanner message={errorKonteks} />
-        ) : !konteks.ada_data ? (
+        ) : !konteks?.ada_data ? (
           <div className="bg-yellow-500/10 border border-yellow-500/35 rounded-xl p-3 text-sm text-yellow-500">
-            {konteks.message}
+            {konteks?.message || "Data belum tersedia"}
           </div>
         ) : (
           <>
+            <label className="flex items-center text-xs font-semibold text-slate-300 mb-1.5 mt-3.5">
+              Produk
+            </label>
+            <select
+              className="w-full px-3 py-2.5 rounded-lg border border-slate-700 bg-slate-900 text-slate-100"
+              value={formStok.produkId}
+              onChange={(e) =>
+                setFormStok({
+                  ...formStok,
+                  produkId: Number(e.target.value)
+                })
+              }
+            >
+              {PRODUK_OPT.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+
             <label className="flex items-center text-xs font-semibold text-slate-300 mb-1.5 mt-3.5">
               Stok Saat Ini (ton)<FromDbTag />
             </label>
@@ -484,8 +587,8 @@ function TabTren() {
 
   const chartData = data
     ? [
-        ...data.historis.map((d) => ({ ...d })),
-        ...data.prediksi.map((d) => ({ bulan: d.bulan, stokPrediksi: d.stokPrediksi })),
+        ...(data.historis || []).map((d) => ({ ...d })),
+        ...(data.prediksi || []).map((d) => ({ bulan: d.bulan, stokPrediksi: d.stokPrediksi })),
       ]
     : [];
 
@@ -555,7 +658,7 @@ function TabTren() {
                 <XAxis dataKey="bulan" tick={{ fontSize: 12, fill: "#94a3b8" }} />
                 <YAxis tick={{ fontSize: 12, fill: "#94a3b8" }} tickFormatter={(v) => `${v/1000}k`} />
                 <Tooltip content={<CustomTooltip />} />
-                {data.historis.length > 0 && (
+                {data.historis && data.historis.length > 0 && (
                   <ReferenceLine
                     x={data.historis[data.historis.length - 1]?.bulan}
                     stroke="#475569" strokeDasharray="4 2" label={{ value: "sekarang", fontSize: 11, fill: "#94a3b8" }}
@@ -567,7 +670,7 @@ function TabTren() {
                   strokeWidth={2.5} strokeDasharray="5 3" dot={{ r: 4, fill: "#f0b13e" }} connectNulls />
               </LineChart>
             ) : (
-              <BarChart data={data.historis} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+              <BarChart data={data.historis || []} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                 <XAxis dataKey="bulan" tick={{ fontSize: 12, fill: "#94a3b8" }} />
                 <YAxis tick={{ fontSize: 12, fill: "#94a3b8" }} />
@@ -580,7 +683,7 @@ function TabTren() {
           </ResponsiveContainer>
         )}
 
-        {!loading && data && data.historis.length === 0 && (
+        {!loading && data && (!data.historis || data.historis.length === 0) && (
           <div className="text-center py-10 text-slate-400">
             <Inbox size={32} strokeWidth={1.4} className="mx-auto mb-2" />
             <p className="text-sm">Belum ada data distribusi di database.<br/>Tambahkan data distribusi terlebih dahulu.</p>
@@ -588,12 +691,12 @@ function TabTren() {
         )}
       </div>
 
-      {data && data.historis.length > 0 && (
+      {data && data.historis && data.historis.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { label: "Rata-rata distribusi/bulan", val: fmt(data.summary.rataRataDistribusiBulanan) + " ton", Icon: Gauge },
-            { label: `Prediksi stok ${bulan} bulan`, val: fmt(data.prediksi[data.prediksi.length - 1]?.stokPrediksi ?? 0) + " ton", Icon: Sparkles },
-            { label: "Total distribusi historis", val: fmt(data.summary.totalDistribusiHistoris) + " ton", Icon: Truck },
+            { label: "Rata-rata distribusi/bulan", val: fmt(data.summary?.rataRataDistribusiBulanan || 0) + " ton", Icon: Gauge },
+            { label: `Prediksi stok ${bulan} bulan`, val: fmt(data.prediksi?.[data.prediksi.length - 1]?.stokPrediksi ?? 0) + " ton", Icon: Sparkles },
+            { label: "Total distribusi historis", val: fmt(data.summary?.totalDistribusiHistoris || 0) + " ton", Icon: Truck },
           ].map((s) => (
             <div key={s.label} className="bg-slate-800 border border-slate-700 rounded-2xl p-4 shadow-lg">
               <s.Icon size={20} className="text-green-500 mb-2.5" />
@@ -622,7 +725,7 @@ function TabRiwayat() {
       const res = await fetch(`${API_BASE}/riwayat${q}`);
       const json = await res.json();
       if (!res.ok || !json.success) throw new Error(json.error || "Gagal memuat riwayat.");
-      setRiwayat(json.riwayat);
+      setRiwayat(json.riwayat || []);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -669,7 +772,7 @@ function TabRiwayat() {
       ) : (
         <AnimatePresence>
           {riwayat.map((r, i) => (
-            <motion.div key={r.id}
+            <motion.div key={r.id || i}
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ delay: i * 0.04 }}
@@ -686,12 +789,12 @@ function TabRiwayat() {
                       <span className="font-bold text-sm text-slate-100">
                         Prediksi {r.tipe === "kebutuhan" ? "Kebutuhan Distribusi" : "Stok Periode Berikutnya"}
                       </span>
-                      <Badge status={r.tipe === "kebutuhan" ? r.prediksi.keterangan : r.prediksi.status} />
+                      <Badge status={r.tipe === "kebutuhan" ? r.prediksi?.keterangan : r.prediksi?.status} />
                     </div>
                     <div className="text-sm text-slate-300">
                       {r.tipe === "kebutuhan"
-                        ? `Hasil: ${fmt(r.prediksi.kebutuhanTon)} ton kebutuhan distribusi`
-                        : `Hasil: ${fmt(r.prediksi.stokPeriodeBerikutnyaTon)} ton stok berikutnya`}
+                        ? `Hasil: ${fmt(r.prediksi?.kebutuhanTon || 0)} ton kebutuhan distribusi`
+                        : `Hasil: ${fmt(r.prediksi?.stokPeriodeBerikutnyaTon || 0)} ton stok berikutnya`}
                       {r.produk && r.produk !== "-" ? ` · ${r.produk}` : ""}
                     </div>
                     <div className="text-xs text-slate-400 mt-1">{fmtDate(r.timestamp)}</div>
@@ -704,7 +807,7 @@ function TabRiwayat() {
                 </button>
               </div>
 
-              {Object.keys(r.input).length > 0 && (
+              {r.input && Object.keys(r.input).length > 0 && (
                 <div className="mt-3 pt-3 border-t border-slate-700 flex gap-4 flex-wrap">
                   {Object.entries(r.input).filter(([k]) => !k.includes("Label")).map(([k, v]) => (
                     <div key={k} className="text-xs">
@@ -734,7 +837,7 @@ export default function PrediksiAI() {
     try {
       const res = await fetch(`${API_BASE}/riwayat?limit=100`);
       const json = await res.json();
-      if (json.success) setRiwayatCount(json.total);
+      if (json.success) setRiwayatCount(json.total || 0);
     } catch {
       // server AI belum jalan, abaikan
     }

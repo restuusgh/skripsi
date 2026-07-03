@@ -5,11 +5,12 @@ import kebutuhanRoute from "./routes/kebutuhan.js";
 import stokRoute from "./routes/stok.js";
 import trenRoute from "./routes/tren.js";
 import riwayatRoute from "./routes/riwayat.js";
+import konteksRoute from "./routes/konteks.js"
 
 const app = express();
 const PORT = process.env.AI_PORT || 4000;
 
-// ── Middleware ────────────────────────────────────────────────────────────────
+
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -18,7 +19,7 @@ app.use(
 
 app.use(express.json());
 
-// ── Health Check ──────────────────────────────────────────────────────────────
+
 app.get("/api/health", (_req, res) => {
   res.json({
     status: "ok",
@@ -28,7 +29,8 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-// ── Routes ────────────────────────────────────────────────────────────────────
+// ── Routes
+app.use("/api/prediksi", konteksRoute);
 app.use("/api/prediksi", kebutuhanRoute);
 app.use("/api/prediksi", stokRoute);
 app.use("/api/prediksi", trenRoute);
@@ -46,7 +48,7 @@ app.use((err, _req, res, _next) => {
 
 // ── Start Server ──────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`\nOpenNyawitAi berjalan di http://localhost:${PORT}`);
+  console.log(`\nOpen Nyawit Ai berjalan di http://localhost:${PORT}`);
   console.log(`   GET  http://localhost:${PORT}/api/health`);
   console.log(`   POST http://localhost:${PORT}/api/prediksi/kebutuhan`);
   console.log(`   POST http://localhost:${PORT}/api/prediksi/stok`);

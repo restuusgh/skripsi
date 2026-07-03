@@ -26,6 +26,7 @@ enum StatusDistribusi {
 }
 
 enum TipeAI {
+  distribusi
   kebutuhan
   stok
 }

@@ -323,13 +323,14 @@ This project was developed for academic purposes. It is open for forking and edu
 
 ## Repository Notes
 
-This repository was created as part of an undergraduate thesis project in Informatics Engineering. It demonstrates the design and implementation of a web-based Palm Oil Distribution Information System integrated with Artificial Intelligence (Brain.js Neural Network) for distribution and stock forecasting.
-
+This repository was created as part of an undergraduate thesis project in Informatics Engineering, submitted as one of the requirements for obtaining a Bachelor of Engineering degree in the Informatics Engineering Study Program, Faculty of Engineering and Agriculture, Universitas Islam Nusantara.
+ 
+It demonstrates the design and implementation of a web-based Palm Oil Distribution Information System integrated with Artificial Intelligence (Brain.js Neural Network) for distribution and stock forecasting.
+ 
 Intended use cases:
-
+ 
 - Academic research and study reference
 - Full-stack JavaScript development reference
 - AI integration reference using Brain.js
 - Software engineering portfolio demonstration
-
 The project may continue to evolve during the course of the research. Feedback and suggestions are welcome.

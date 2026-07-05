@@ -716,6 +716,7 @@ function TabRiwayat() {
   const [filter, setFilter] = useState("semua");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deletingAll, setDeletingAll] = useState(false);
 
   const fetchRiwayat = async () => {
     setLoading(true);
@@ -743,10 +744,41 @@ function TabRiwayat() {
       fetchRiwayat();
     }
   };
+    const handleHapusSemua = async () => {
+    if (riwayat.length === 0) return;
+
+    const konfirmasi = window.confirm(
+      `Hapus semua ${riwayat.length} riwayat prediksi${filter !== "semua" ? ` (filter: ${filter})` : ""}? Tindakan ini tidak bisa dibatalkan.`
+    );
+    if (!konfirmasi) return;
+
+    setDeletingAll(true);
+    setError("");
+
+    const idList = riwayat.map((r) => r.id);
+    const snapshot = riwayat;
+    setRiwayat([]);
+
+    try {
+      const results = await Promise.allSettled(
+        idList.map((id) => fetch(`${API_BASE}/riwayat/${id}`, { method: "DELETE" }))
+      );
+      const adaGagal = results.some((r) => r.status === "rejected");
+      if (adaGagal) {
+        setError("Sebagian riwayat gagal dihapus. Memuat ulang daftar...");
+        fetchRiwayat();
+      }
+    } catch {
+      setError("Gagal menghapus riwayat. Memuat ulang daftar...");
+      setRiwayat(snapshot);
+    } finally {
+      setDeletingAll(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-2 items-center flex-wrap">
         {["semua", "kebutuhan", "stok"].map((f) => (
           <button key={f} onClick={() => setFilter(f)} 
             className={`px-4 py-1.5 rounded-lg border text-sm font-semibold capitalize transition-all ${
@@ -757,6 +789,20 @@ function TabRiwayat() {
             {f === "semua" ? "Semua" : f}
           </button>
         ))}
+
+        <button
+          onClick={handleHapusSemua}
+          disabled={deletingAll || loading || riwayat.length === 0}
+          className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg border text-sm font-semibold transition-all ${
+            deletingAll || loading || riwayat.length === 0
+              ? 'bg-transparent text-slate-500 border-slate-700 cursor-not-allowed'
+              : 'bg-red-500/10 text-red-500 border-red-500/40 hover:bg-red-500/20'
+          }`}
+        >
+          {deletingAll ? <Spinner size={13} /> : <Trash2 size={14} />}
+          {deletingAll ? "Menghapus..." : "Hapus Semua"}
+        </button>
+
         <span className="ml-auto text-slate-400 text-sm">
           {loading ? "Memuat..." : `${riwayat.length} hasil`}
         </span>

@@ -8,6 +8,9 @@ import AdminLayout from "./components/layouts/AdminLayout";
 import Dashboard from "./components/pages/Dashboard";
 import PrediksiAI from "./components/pages/PrediksiAi";
 import DataProduk from "./components/pages/DataProduk";
+import Monitoring from "./components/pages/Monitoring";
+import Distributor from "./components/pages/Distributor";
+import Distribusi from "./components/pages/Distribusi";
 
 function App() {
   return (
@@ -38,6 +41,18 @@ function App() {
         <Route
         path="produk"
         element={<DataProduk/>}
+        />
+        <Route
+        path="monitoring"
+        element={<Monitoring/>}
+        />
+        <Route
+        path="distributor"
+        element={<Distributor/>}
+        />
+        <Route
+        path="distribusi"
+        element={<Distribusi/>}
         />
       </Route>
 

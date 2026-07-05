@@ -1,4 +1,3 @@
-// packages/db/prisma/seed.js
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -7,19 +6,25 @@ async function main() {
   console.log("Memulai seed database...");
 
   // Hapus seluruh data lama (urutan penting karena foreign key)
-  console.log("Menghapus data lama...");
-  await prisma.hasilPrediksi.deleteMany();
-  await prisma.detailDistribusi.deleteMany();
-  await prisma.distribusi.deleteMany();
-  await prisma.stok.deleteMany();
-  await prisma.produk.deleteMany();
-  await prisma.kendaraan.deleteMany();
-  await prisma.tujuanDistribusi.deleteMany();
-  await prisma.notifikasi.deleteMany();
-  await prisma.laporan.deleteMany();
-  await prisma.aktivitasLog.deleteMany();
-  await prisma.prediksiStok.deleteMany();
-  console.log("Data lama berhasil dihapus");
+console.log("Menghapus data lama...");
+
+await prisma.$executeRawUnsafe(`
+  TRUNCATE TABLE
+    "hasil_prediksi",
+    "prediksi_stok",
+    "detail_distribusi",
+    "distribusi",
+    "stok",
+    "produk",
+    "kendaraan",
+    "tujuan_distribusi",
+    "notifikasi",
+    "laporan",
+    "aktivitas_log"
+  RESTART IDENTITY CASCADE;
+`);
+
+console.log("Data lama berhasil dihapus");
 
   // =====================================================================
   // USER
@@ -37,34 +42,52 @@ async function main() {
     },
   });
 
-  console.log("✅ User seeded:", admin.email);
+  console.log("User seeded:", admin.email);
 
   // =====================================================================
   // PRODUK
   // =====================================================================
-  const produk = await prisma.produk.create({
+  const cpo = await prisma.produk.create({
     data: {
       namaProduk: "Crude Palm Oil (CPO)",
-      jenisProduk: "Produk Olahan",
+      jenisProduk: "Bahan Baku",
       satuan: "Ton",
       deskripsi: "Crude Palm Oil siap didistribusikan",
     },
   });
 
-  console.log("✅ Produk seeded:", produk.namaProduk);
+  const minyakGoreng = await prisma.produk.create({
+    data: {
+      namaProduk: "Minyak Goreng",
+      jenisProduk: "Produk Olahan",
+      satuan: "Ton",
+      deskripsi: "Minyak goreng hasil pengolahan CPO",
+    },
+  });
+
+  console.log("Produk seeded:", cpo.namaProduk);
+  console.log("Produk seeded:", minyakGoreng.namaProduk);
 
   // =====================================================================
   // STOK
   // =====================================================================
-  await prisma.stok.create({
-    data: {
-      produkId: produk.id,
-      jumlahStok: 1200,
-      minimalStok: 200,
-    },
+  await prisma.stok.createMany({
+    data: [
+      {
+        produkId: cpo.id,
+        jumlahStok: 1200,
+        minimalStok: 200,
+      },
+      {
+        produkId: minyakGoreng.id,
+        jumlahStok: 850,
+        minimalStok: 150,
+      },
+    ],
   });
 
-  console.log("✅ Stok CPO seeded: 1200 ton");
+  console.log("Stok CPO: 1200 ton");
+  console.log("Stok Minyak Goreng: 850 ton");
 
   // =====================================================================
   // TUJUAN DISTRIBUSI
@@ -96,7 +119,7 @@ async function main() {
     tujuanList.push(item);
   }
 
-  console.log("✅ Tujuan Distribusi:", tujuanList.length);
+  console.log("Tujuan Distribusi:", tujuanList.length);
 
   // =====================================================================
   // KENDARAAN
@@ -131,7 +154,7 @@ async function main() {
     kendaraanList.push(item);
   }
 
-  console.log("✅ Kendaraan:", kendaraanList.length);
+  console.log("Kendaraan:", kendaraanList.length);
 
   // =====================================================================
   // HISTORIS DISTRIBUSI 12 BULAN
@@ -163,7 +186,7 @@ async function main() {
 
     const tahun = tgl.getFullYear();
     const bulan = String(tgl.getMonth() + 1).padStart(2, "0");
-    
+
     // Generate kode unik dengan timestamp
     const timestamp = Date.now().toString().slice(-6);
     const kode = `DIST-${tahun}${bulan}-${String(distribusiCount + 1).padStart(3, "0")}-${timestamp}`;
@@ -186,14 +209,17 @@ async function main() {
         kendaraanId: kendaraanList[d.kd].id,
         createdBy: admin.id,
         status: status,
-        keterangan: `Distribusi CPO bulan ${tgl.toLocaleString('id-ID', { month: 'long', year: 'numeric' })}`,
+        keterangan: `Distribusi CPO bulan ${tgl.toLocaleString("id-ID", {
+          month: "long",
+          year: "numeric",
+        })}`,
       },
     });
 
     await prisma.detailDistribusi.create({
       data: {
         distribusiId: distribusi.id,
-        produkId: produk.id,
+        produkId: d.bulanOffset % 2 === 0 ? cpo.id : minyakGoreng.id,
         jumlah: d.jumlah,
       },
     });
@@ -201,50 +227,53 @@ async function main() {
     distribusiCount++;
   }
 
-  console.log("✅ Distribusi historis:", distribusiCount);
+  console.log("Distribusi historis:", distribusiCount);
 
   // =====================================================================
-  // PREDIKSI - PERBAIKAN: menggunakan enum yang benar
+  // PREDIKSI
   // =====================================================================
   const periode = `${now.getFullYear()}-${String(
     now.getMonth() + 1
   ).padStart(2, "0")}`;
 
-  // Prediksi untuk kebutuhan distribusi
+  // Prediksi kebutuhan CPO
   const prediksiKebutuhan = await prisma.prediksiStok.create({
     data: {
-      produkId: produk.id,
-      periode: periode,
+      produkId: cpo.id,
+      periode,
       hasilPrediksi: 0,
       metode: "brain.js-neural-network",
-      tipe: "kebutuhan", // ← menggunakan enum yang benar
+      tipe: "kebutuhan",
     },
   });
 
-  // Prediksi untuk stok
+  // Prediksi stok CPO
   const prediksiStok = await prisma.prediksiStok.create({
     data: {
-      produkId: produk.id,
-      periode: periode,
+      produkId: cpo.id,
+      periode,
       hasilPrediksi: 0,
       metode: "brain.js-neural-network",
-      tipe: "stok", // ← menggunakan enum yang benar
+      tipe: "stok",
     },
   });
 
-  console.log("✅ Prediksi seeded");
+  console.log("Prediksi seeded");
 
   // =====================================================================
   // HASIL PREDIKSI (opsional)
   // =====================================================================
-  // Tambahkan hasil prediksi dummy jika diperlukan
-  const bulanNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-  
+  const bulanNames = [
+    "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+    "Jul", "Agu", "Sep", "Okt", "Nov", "Des",
+  ];
+
   for (let i = 1; i <= 6; i++) {
     const bulanIndex = (now.getMonth() + i) % 12;
     const bulanName = bulanNames[bulanIndex];
-    const tahunPrediksi = now.getFullYear() + (now.getMonth() + i >= 12 ? 1 : 0);
-    
+    const tahunPrediksi =
+      now.getFullYear() + (now.getMonth() + i >= 12 ? 1 : 0);
+
     // Hasil untuk prediksi kebutuhan
     await prisma.hasilPrediksi.create({
       data: {
@@ -260,7 +289,7 @@ async function main() {
         }),
       },
     });
-    
+
     // Hasil untuk prediksi stok
     await prisma.hasilPrediksi.create({
       data: {
@@ -278,7 +307,7 @@ async function main() {
     });
   }
 
-  console.log("✅ Hasil prediksi seeded");
+  console.log("Hasil prediksi seeded");
 
   // =====================================================================
   // AKTIVITAS LOG
@@ -312,24 +341,26 @@ async function main() {
     });
   }
 
-  console.log("✅ Aktivitas log seeded");
+  console.log("Aktivitas log seeded");
 
   console.log("\n======================================");
-  console.log("✅ Seed Database Berhasil!");
+  console.log("Seed Database Berhasil!");
   console.log("======================================");
-  console.log(`📦 Produk       : ${produk.namaProduk}`);
-  console.log(`📊 Stok         : 1200 ton`);
-  console.log(`🚚 Distribusi   : ${distribusiCount} bulan`);
-  console.log(`🚗 Kendaraan    : ${kendaraanList.length}`);
-  console.log(`📍 Tujuan       : ${tujuanList.length}`);
-  console.log(`📧 Email Admin  : admin@sawit.com`);
-  console.log(`🔑 Password     : password123`);
+  console.log("Produk:");
+  console.log(`   - ${cpo.namaProduk}`);
+  console.log(`   - ${minyakGoreng.namaProduk}`);
+  console.log(`Stok         : 1200 ton`);
+  console.log(`Distribusi   : ${distribusiCount} bulan`);
+  console.log(`Kendaraan    : ${kendaraanList.length}`);
+  console.log(`Tujuan       : ${tujuanList.length}`);
+  console.log(`Email Admin  : admin@sawit.com`);
+  console.log(`Password     : password123`);
   console.log("======================================");
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Seed Error:", e);
+    console.error("Seed Error:", e);
     process.exit(1);
   })
   .finally(async () => {

@@ -11,6 +11,7 @@ import DataProduk from "./components/pages/DataProduk";
 import Monitoring from "./components/pages/Monitoring";
 import Distributor from "./components/pages/Distributor";
 import Distribusi from "./components/pages/Distribusi";
+import Laporan from "./components/pages/Laporan";
 
 function App() {
   return (
@@ -54,7 +55,19 @@ function App() {
         path="distribusi"
         element={<Distribusi/>}
         />
+        
+        <Route
+        path="laporan"
+        element={<Laporan/>}
+        />
+
       </Route>
+
+        <Route
+        path="distribusi"
+        element={<Distribusi/>}
+        />
+      
 
     </Routes>
   );

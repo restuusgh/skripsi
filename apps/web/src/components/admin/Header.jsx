@@ -29,9 +29,9 @@ export default function Header() {
     <>
       <header className="bg-slate-900 px-4 sm:px-8 py-3 sm:py-4 flex justify-between items-center border-b border-slate-800 sticky top-0 z-30">
 
-        {/* ── Kiri: Title — sembunyikan subtitle di mobile ── */}
+        
         <motion.div
-          className="pl-10 lg:pl-0" // beri ruang untuk hamburger button di mobile
+          className="pl-10 lg:pl-0" 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}

@@ -1,13 +1,51 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, Search, ChevronDown, LogOut, User, Settings, X } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth, AuthProvider } from "../components/hooks/useAuth";
 
-export default function Header() {
+// Judul default per role — dipakai kalau AdminLayout/SupirLayout/dst
+// tidak mengirim prop `title`/`subtitle` secara eksplisit.
+const ROLE_TITLES = {
+  admin: {
+    title: "Dashboard Admin",
+    subtitle: "Sistem Informasi Distribusi Kelapa Sawit",
+  },
+  supir: {
+    title: "Dashboard Supir",
+    subtitle: "Distribusi & Surat Jalan",
+  },
+  kepalaGudang: {
+    title: "Dashboard Kepala Gudang",
+    subtitle: "Monitoring & Update Stok",
+  },
+  pimpinan: {
+    title: "Dashboard Pimpinan",
+    subtitle: "Laporan & Prediksi AI",
+  },
+};
+
+export default function Header({ title, subtitle }) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [hasNotif, setHasNotif] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+
+  // user: { name, email, role } — sesuaikan dengan bentuk data
+  // yang sebenarnya dikembalikan hooks/useAuth.js kamu.
+  const { user, logout } = useAuth();
+
+  const roleInfo = ROLE_TITLES[user?.role] ?? {
+    title: "Dashboard",
+    subtitle: "Sistem Informasi Distribusi Kelapa Sawit",
+  };
+  const headerTitle = title ?? roleInfo.title;
+  const headerSubtitle = subtitle ?? roleInfo.subtitle;
+
+  const displayName = user?.name ?? "Pengguna";
+  const displayEmail = user?.email ?? "-";
 
   // Tutup dropdown saat klik luar
   useEffect(() => {
@@ -25,22 +63,26 @@ export default function Header() {
     if (showSearch) searchRef.current?.focus();
   }, [showSearch]);
 
+  const handleLogout = () => {
+    logout?.();
+    navigate("/login");
+  };
+
   return (
     <>
       <header className="bg-slate-900 px-4 sm:px-8 py-3 sm:py-4 flex justify-between items-center border-b border-slate-800 sticky top-0 z-30">
 
-        
         <motion.div
-          className="pl-10 lg:pl-0" 
+          className="pl-10 lg:pl-0"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
         >
           <h2 className="text-base sm:text-xl font-bold text-white leading-tight">
-            Dashboard Admin
+            {headerTitle}
           </h2>
           <p className="hidden sm:block text-slate-400 text-sm">
-            Sistem Informasi Distribusi Kelapa Sawit
+            {headerSubtitle}
           </p>
         </motion.div>
 
@@ -120,7 +162,9 @@ export default function Header() {
                 className="w-7 h-7 rounded-lg object-cover"
               />
               {/* Nama hanya tampil di sm ke atas */}
-              <span className="hidden sm:inline text-sm text-white font-medium">Admin</span>
+              <span className="hidden sm:inline text-sm text-white font-medium">
+                {displayName}
+              </span>
               <motion.span
                 animate={{ rotate: showDropdown ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
@@ -135,19 +179,19 @@ export default function Header() {
                 <motion.div
                   className="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-50"
                   initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0,  scale: 1  }}
-                  exit={{   opacity: 0, y: -8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.95 }}
                   transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
                 >
                   {/* Info user */}
                   <div className="px-4 py-3 border-b border-slate-700">
-                    <p className="text-sm text-white font-medium">Admin</p>
-                    <p className="text-xs text-slate-400">admin@sawit.id</p>
+                    <p className="text-sm text-white font-medium">{displayName}</p>
+                    <p className="text-xs text-slate-400">{displayEmail}</p>
                   </div>
 
                   {[
-                    { icon: User,     label: "Profil Saya"  },
-                    { icon: Settings, label: "Pengaturan"   },
+                    { icon: User, label: "Profil Saya" },
+                    { icon: Settings, label: "Pengaturan" },
                   ].map(({ icon: Icon, label }, i) => (
                     <motion.button
                       key={i}
@@ -166,6 +210,7 @@ export default function Header() {
                     className="flex items-center gap-3 w-full px-4 py-2.5 mb-1 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
                     whileHover={{ x: 3 }}
                     transition={{ duration: 0.15 }}
+                    onClick={handleLogout}
                   >
                     <LogOut size={14} />
                     Logout
@@ -196,8 +241,8 @@ export default function Header() {
             <motion.div
               className="sm:hidden fixed top-0 left-0 right-0 z-50 bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center gap-3"
               initial={{ y: -60, opacity: 0 }}
-              animate={{ y: 0,   opacity: 1 }}
-              exit={{   y: -60, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -60, opacity: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 35 }}
             >
               <Search size={16} className="text-slate-400 flex-shrink-0" />

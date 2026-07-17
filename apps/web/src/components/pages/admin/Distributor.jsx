@@ -345,7 +345,7 @@ export default function Distributor() {
     }
   };
 
-  const handleExportExcel = () => alert("Export Excel — hubungkan dengan library export sesuai kebutuhan.");
+
 
   const TABLE_COLS = ["Distributor", "Kota", "PIC", "Telepon", "Distribusi", "Status"];
 
@@ -391,17 +391,7 @@ export default function Distributor() {
             <option value="semua">Semua Status</option>
             {STATUS_OPT.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
           </select>
-
-          <button onClick={handleExportExcel}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-slate-700 text-slate-200 text-sm font-semibold hover:bg-slate-700 transition-colors">
-            <Download size={14} /> Export Excel
-          </button>
-          <button onClick={fetchDistributor}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-slate-700 text-slate-200 text-sm font-semibold hover:bg-slate-700 transition-colors">
-            <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
-          </button>
         </div>
-
         {error && <div className="mb-4"><ErrorBox>{error}</ErrorBox></div>}
 
         {/* Tabel */}

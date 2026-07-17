@@ -318,7 +318,7 @@ export default function Pengaturan() {
               </div>
               <SaveButton>Perbarui Kata Sandi</SaveButton>
 
-              <div className="!mt-6 border-t border-slate-700 pt-5">
+              <div className="mt-6 border-t border-slate-700 pt-5">
                 <Toggle
                   label="Verifikasi dua langkah (2FA)"
                   description="Tambahan lapisan keamanan saat masuk ke akun"

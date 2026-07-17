@@ -127,13 +127,7 @@ export default function Monitoring() {
     setLoading(true);
     setError("");
     try {
-      // const res = await fetch(`${API_BASE}/overview`);
-      // const json = await res.json();
-      // if (!res.ok || !json.success) throw new Error(json.error || "Gagal memuat data monitoring.");
-      // setStats(json.stats);
-      // setKendaraanList(json.kendaraan);
-      // setAktivitas(json.aktivitas);
-      // setDistribusiList(json.distribusi);
+
     } catch (e) {
       setError(e.message);
     } finally {

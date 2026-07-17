@@ -1,44 +1,33 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import prisma from "@skripsi/db";
 import { appConfig } from "../../config/app.config.js";
-import { findUserByEmail, findUserById } from "./auth.repository.js";
-import { validateLogin } from "./auth.validation.js";
 
-export const loginService = async (body) => {
-  validateLogin(body);
+export const loginService = async (email, password) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) throw { status: 401, message: "Email atau password salah." };
+  if (user.status === "NONAKTIF") throw { status: 403, message: "Akun tidak aktif." };
 
-  const { email, password } = body;
-
-  const user = await findUserByEmail(email);
-  if (!user) {
-    throw new Error("Email tidak ditemukan");
-  }
-
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    throw new Error("Password salah");
-  }
+  const valid = await bcrypt.compare(password, user.password);
+  if (!valid) throw { status: 401, message: "Email atau password salah." };
 
   const token = jwt.sign(
-    {
-      id: user.id,
-      role: user.role,
-    },
+    { id: user.id, email: user.email, role: user.role, nama: user.nama },
     appConfig.jwtSecret,
-    { expiresIn: "1d" }
+    { expiresIn: "8h" }
   );
 
   return {
     token,
-    user: {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    },
+    user: { id: user.id, nama: user.nama, email: user.email, role: user.role },
   };
 };
 
-export const meService = async (userId) => {
-  return findUserById(userId);
+export const getMeService = async (id) => {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: { id: true, nama: true, email: true, role: true, status: true, createdAt: true },
+  });
+  if (!user) throw { status: 404, message: "User tidak ditemukan." };
+  return user;
 };

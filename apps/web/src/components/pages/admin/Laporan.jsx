@@ -8,6 +8,8 @@ import {
   ResponsiveContainer, LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from "recharts";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // ── Data dummy (ganti dengan agregasi dari API produk/distributor/distribusi) ──
 const PERIODE_OPT = [

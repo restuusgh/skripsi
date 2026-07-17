@@ -458,8 +458,7 @@ export default function Distribusi() {
     kendaraanId: KENDARAAN_OPT.find((k) => k.plat === d.kendaraan)?.id,
   });
 
-  const handleExportExcel = () => alert("Export Excel — hubungkan dengan library export sesuai kebutuhan.");
-  const handleExportPdf = () => alert("Export PDF — hubungkan dengan library export sesuai kebutuhan.");
+  
 
   const TABLE_COLS = ["No. SJ", "Produk", "Distributor", "Kendaraan", "Tanggal", "Status", "Progress"];
 
@@ -509,19 +508,6 @@ export default function Distribusi() {
           <select className={`${inputCls} min-w-[160px]`} value={filterDistributor} onChange={(e) => setFilterDistributor(e.target.value)}>
             {distributorOptions.map((d) => <option key={d} value={d}>{d === "semua" ? "Semua Distributor" : d}</option>)}
           </select>
-
-          <button onClick={handleExportExcel}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-slate-700 text-slate-200 text-sm font-semibold hover:bg-slate-700 transition-colors">
-            <Download size={14} /> Excel
-          </button>
-          <button onClick={handleExportPdf}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-slate-700 text-slate-200 text-sm font-semibold hover:bg-slate-700 transition-colors">
-            <FileText size={14} /> PDF
-          </button>
-          <button onClick={fetchDistribusi}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-slate-700 text-slate-200 text-sm font-semibold hover:bg-slate-700 transition-colors">
-            <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
-          </button>
         </div>
 
         {error && <div className="mb-4"><ErrorBox>{error}</ErrorBox></div>}

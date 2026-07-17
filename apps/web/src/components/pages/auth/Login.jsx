@@ -35,7 +35,7 @@ export default function Login() {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       
       // Contoh validasi sederhana
-      if (form.email === "admin@sawit.com" && form.password === "password123") {
+      if (form.email === "admin@gmail.com" && form.password === "password123") {
         localStorage.setItem("token", "dummy-token");
         localStorage.setItem("user", JSON.stringify({
           name: "Admin Utama",

@@ -3,8 +3,9 @@ import {
   LayoutDashboard, Package, Truck, Building2,
   MapPinned, FileText, BrainCircuit, Users, Settings, LogOut, Menu, X,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useAuth } from "./hooks/useAuth";
 
 const sidebarVariants = {
   hidden: { x: -40, opacity: 0 },
@@ -30,7 +31,6 @@ const drawerVariants = {
       type: "spring",
       stiffness: 400,
       damping: 40,
-      // saat menutup: nav items fade duluan, baru drawer slide keluar
       when: "afterChildren",
       staggerChildren: 0.03,
       staggerDirection: -1,
@@ -43,7 +43,6 @@ const drawerVariants = {
       type: "spring",
       stiffness: 300,
       damping: 30,
-      // saat membuka: drawer slide dulu, baru anak-anak muncul
       when: "beforeChildren",
       staggerChildren: 0.05,
       delayChildren: 0.1,
@@ -95,7 +94,16 @@ function HamburgerIcon({ isOpen }) {
 
 // ── Shared SidebarContent ─────────────────────────────
 function SidebarContent({ onClose, isMobile = false }) {
+  const navigate = useNavigate();
+  const { logout } = useAuth(); // ← Ambil fungsi logout dari hook
+
   const itemWrapper = isMobile ? drawerItemVariants : navItemVariants;
+
+  // ── Fungsi handleLogout ─────────────────────────────
+  const handleLogout = () => {
+    logout?.(); // Panggil fungsi logout dari hook
+    navigate("/login", { replace: true }); // Redirect ke halaman login
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -148,7 +156,6 @@ function SidebarContent({ onClose, isMobile = false }) {
               whileHover="hovered"
               initial="rest"
               animate="rest"
-              // delay stagger manual untuk mobile
               custom={index}
             >
               <NavLink
@@ -241,6 +248,7 @@ function SidebarContent({ onClose, isMobile = false }) {
         whileHover="hovered"
       >
         <motion.button
+          onClick={handleLogout} // ← Panggil handleLogout di sini
           className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-slate-400 relative overflow-hidden"
           whileTap={{ scale: 0.97 }}
         >
@@ -280,7 +288,6 @@ const menus = [
   { name: "Pengguna",    path: "/admin/pengguna",    icon: Users },
   { name: "Pengaturan",  path: "/admin/pengaturan",  icon: Settings },
 ];
-
 
 export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);

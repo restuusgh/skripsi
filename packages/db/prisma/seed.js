@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -26,17 +27,18 @@ await prisma.$executeRawUnsafe(`
 
 console.log("Data lama berhasil dihapus");
 
-  // =====================================================================
-  // USER
-  // =====================================================================
+  const hashAdmin = await bcrypt.hash("admin123", 10);
+  const hashSupir = await bcrypt.hash("supir123", 10);
+  const hashGudang = await bcrypt.hash("gudang123", 10);
+  const hashPimpinan = await bcrypt.hash("pimpinan123", 10);
+
   const admin = await prisma.user.upsert({
     where: { email: "admin@sawit.com" },
-    update: {},
+    update: { password: hashAdmin, role: "ADMIN", status: "AKTIF" },
     create: {
       nama: "Admin Utama",
       email: "admin@sawit.com",
-      password:
-        "$2b$10$abcdefghijklmnopqrstuuVGZzZ7Q5Y5Y5Y5Y5Y5Y5Y5Y5Y5Y5Y5Y",
+      password: hashAdmin,
       role: "ADMIN",
       status: "AKTIF",
     },
@@ -44,9 +46,47 @@ console.log("Data lama berhasil dihapus");
 
   console.log("User seeded:", admin.email);
 
-  // =====================================================================
-  // PRODUK
-  // =====================================================================
+  const supir = await prisma.user.upsert({
+    where: { email: "supir@sawit.com" },
+    update: { password: hashSupir, role: "SUPIR", status: "AKTIF" },
+    create: {
+      nama: "Budi Santoso",
+      email: "supir@sawit.com",
+      password: hashSupir,
+      role: "SUPIR",
+      status: "AKTIF",
+    },
+  });
+
+  const gudang = await prisma.user.upsert({
+    where: { email: "gudang@sawit.com" },
+    update: { password: hashGudang, role: "KEPALA_GUDANG", status: "AKTIF" },
+    create: {
+      nama: "Rina Wati",
+      email: "gudang@sawit.com",
+      password: hashGudang,
+      role: "KEPALA_GUDANG",
+      status: "AKTIF",
+    },
+  });
+
+  const pimpinan = await prisma.user.upsert({
+    where: { email: "pimpinan@sawit.com" },
+    update: { password: hashPimpinan, role: "PIMPINAN", status: "AKTIF" },
+    create: {
+      nama: "Direktur Utama",
+      email: "pimpinan@sawit.com",
+      password: hashPimpinan,
+      role: "PIMPINAN",
+      status: "AKTIF",
+    },
+  });
+
+  console.log("User seeded:", supir.email);
+  console.log("User seeded:", gudang.email);
+  console.log("User seeded:", pimpinan.email);
+
+
   const cpo = await prisma.produk.create({
     data: {
       namaProduk: "Crude Palm Oil (CPO)",
@@ -68,9 +108,7 @@ console.log("Data lama berhasil dihapus");
   console.log("Produk seeded:", cpo.namaProduk);
   console.log("Produk seeded:", minyakGoreng.namaProduk);
 
-  // =====================================================================
-  // STOK
-  // =====================================================================
+  
   await prisma.stok.createMany({
     data: [
       {
@@ -89,9 +127,6 @@ console.log("Data lama berhasil dihapus");
   console.log("Stok CPO: 1200 ton");
   console.log("Stok Minyak Goreng: 850 ton");
 
-  // =====================================================================
-  // TUJUAN DISTRIBUSI
-  // =====================================================================
   const tujuanData = [
     {
       namaTujuan: "Distributor CPO Bandung",
@@ -121,9 +156,7 @@ console.log("Data lama berhasil dihapus");
 
   console.log("Tujuan Distribusi:", tujuanList.length);
 
-  // =====================================================================
-  // KENDARAAN
-  // =====================================================================
+  
   const kendaraanData = [
     {
       platNomor: "D 1234 AB",
@@ -156,9 +189,7 @@ console.log("Data lama berhasil dihapus");
 
   console.log("Kendaraan:", kendaraanList.length);
 
-  // =====================================================================
-  // HISTORIS DISTRIBUSI 12 BULAN
-  // =====================================================================
+
   const historisData = [
     { bulanOffset: -11, jumlah: 380, tj: 0, kd: 0 },
     { bulanOffset: -10, jumlah: 420, tj: 1, kd: 1 },
@@ -229,9 +260,8 @@ console.log("Data lama berhasil dihapus");
 
   console.log("Distribusi historis:", distribusiCount);
 
-  // =====================================================================
-  // PREDIKSI
-  // =====================================================================
+  
+
   const periode = `${now.getFullYear()}-${String(
     now.getMonth() + 1
   ).padStart(2, "0")}`;

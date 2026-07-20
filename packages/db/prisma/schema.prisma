@@ -7,10 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-
 enum Role {
   ADMIN
+  SUPIR
+  KEPALA_GUDANG
   PIMPINAN
 }
 
@@ -47,8 +47,27 @@ model User {
   aktivitasLog AktivitasLog[]
   laporan      Laporan[]
   notifikasi   Notifikasi[]
+  riwayatStok RiwayatStok[] 
 
   @@map("users")
+}
+
+model RiwayatStok {
+  id        Int      @id @default(autoincrement())
+  produkId  Int
+  userId    Int
+  tipe      String   // "MASUK" | "KELUAR"
+  jumlah    Decimal  @db.Decimal(10, 2)
+  alasan    String
+  catatan   String?
+  stokAwal  Decimal  @db.Decimal(10, 2)
+  stokAkhir Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+
+  produk Produk @relation(fields: [produkId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("riwayat_stok")
 }
 
 model Produk {
@@ -63,6 +82,7 @@ model Produk {
   stok             Stok?
   detailDistribusi DetailDistribusi[]
   prediksiStok     PrediksiStok[]
+  riwayatStok RiwayatStok[] 
 
   @@map("produk")
 }
@@ -84,6 +104,8 @@ model TujuanDistribusi {
   namaTujuan String
   alamat     String
   kontak     String?
+  lat        Decimal? @db.Decimal(9, 6)  
+  lng        Decimal? @db.Decimal(9, 6)
 
   distribusi Distribusi[]
 
@@ -98,9 +120,23 @@ model Kendaraan {
   status    String  @default("tersedia")
 
   distribusi Distribusi[]
+  lokasi     LokasiKendaraan?
 
   @@map("kendaraan")
 }
+
+model LokasiKendaraan {
+  id          Int      @id @default(autoincrement())
+  kendaraanId Int      @unique
+  lat         Decimal  @db.Decimal(9, 6)
+  lng         Decimal  @db.Decimal(9, 6)
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  kendaraan Kendaraan @relation(fields: [kendaraanId], references: [id])
+
+  @@map("lokasi_kendaraan")
+}
+
 
 model Distribusi {
   id                Int              @id @default(autoincrement())

@@ -4,8 +4,8 @@ import { AuthProvider, useAuth } from "./components/hooks/useAuth";
 // ── Layouts ───────────────────────────────────────────
 import AdminLayout        from "./components/layouts/AdminLayout";
 import SupirLayout        from "./components/layouts/SupirLayout";
-// import KepalaGudangLayout from "./components/layouts/KepalaGudangLayout";
-// import PimpinanLayout     from "./components/layouts/PimpinanLayout";
+import KepalaGudangLayout from "./components/layouts/KepalaGudangLayout";
+import PimpinanLayout     from "./components/layouts/PimpinanLayout";
 
 // ── Auth ──────────────────────────────────────────────
 import Login from "./components/pages/auth/Login";
@@ -26,16 +26,16 @@ import DataDistribusi      from "./components/pages/supir/DataDistribusi";
 import KonfirmasiDistribusi from "./components/pages/supir/KonfirmasiDistribusi";
 import SuratJalan          from "./components/pages/supir/SuratJalan";
 
-// ── Kepala Gudang pages ───────────────────────────────
-// import UpdateStok    from "./components/pages/kepalaGudang/UpdateStok";
-// import MonitoringStok from "./components/pages/kepalaGudang/MonitoringStok";
+// ── Kepala Gudang pages 
+import UpdateStok    from "./components/pages/kepalaGudang/UpdateStok";
+import MonitoringStok from "./components/pages/kepalaGudang/MonitoringStok";
 
-// ── Pimpinan pages ────────────────────────────────────
-// import DashboardPimpinan    from "./components/pages/pimpinan/Dashboard";
-// import GrafikTren           from "./components/pages/pimpinan/GrafikTren";
-// import LaporanPimpinan      from "./components/pages/pimpinan/Laporan";
-// import HasilPrediksiAI      from "./components/pages/pimpinan/HasilPrediksiAI";
-// import MonitoringAktivitas  from "./components/pages/pimpinan/MonitoringAktivitas";
+// ── Pimpinan pages 
+import DashboardPimpinan from "./components/pages/pimpinan/DashboardPimpinan";
+import GrafikTren           from "./components/pages/pimpinan/GrafikTren";
+import LaporanPimpinan      from "./components/pages/pimpinan/Laporan";
+import HasilPrediksiAI      from "./components/pages/pimpinan/HasilPrediksiAI";
+import MonitoringAktivitas  from "./components/pages/pimpinan/MonitoringAktivitas";
 
 // ── ProtectedRoute ────────────────────────────────────
 // Redirect ke login jika belum auth, atau ke halaman sesuai role
@@ -118,7 +118,7 @@ function App() {
         </Route>
 
         {/* ── Kepala Gudang ── */}
-        {/* <Route path="/kepala-gudang" element={
+        <Route path="/kepala-gudang" element={
           <ProtectedRoute allowedRole="KEPALA_GUDANG">
             <KepalaGudangLayout />
           </ProtectedRoute>
@@ -126,10 +126,10 @@ function App() {
           <Route index element={<Navigate to="monitoring" replace />} />
           <Route path="monitoring" element={<MonitoringStok />} />
           <Route path="update-stok" element={<UpdateStok />} />
-        </Route> */}
+        </Route>
 
         {/* ── Pimpinan ── */}
-        {/* <Route path="/pimpinan" element={
+        <Route path="/pimpinan" element={
           <ProtectedRoute allowedRole="PIMPINAN">
             <PimpinanLayout />
           </ProtectedRoute>
@@ -138,9 +138,9 @@ function App() {
           <Route path="dashboard"           element={<DashboardPimpinan />} />
           <Route path="grafik-tren"         element={<GrafikTren />} />
           <Route path="laporan"             element={<LaporanPimpinan />} />
-          <Route path="hasil-prediksi"      element={<HasilPrediksiAI />} />
-          <Route path="monitoring-aktivitas" element={<MonitoringAktivitas />} />
-        </Route> */}
+          <Route path="prediksi-ai"         element={<HasilPrediksiAI />} />
+          <Route path="monitoring"          element={<MonitoringAktivitas />} />
+        </Route>
 
         {/* 404 — fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

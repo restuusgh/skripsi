@@ -26,15 +26,18 @@ const STEPS = [
   { key: "selesai",     label: "Pengiriman Selesai", icon: CircleCheck },
 ];
 
+// Semua step punya lebar tetap (w-[72px]) supaya garis penghubung selalu
+// sejajar dengan titik tengah lingkaran, apapun panjang teks labelnya
+// (sebelumnya label 1 baris vs 2 baris bikin garis jadi tidak rata).
 const Timeline = () => (
-  <div className="flex items-center gap-0 mb-8">
+  <div className="flex items-start mb-8">
     {STEPS.map((step, i) => {
       const active  = i <= 2; // step 0–2 sudah aktif saat di halaman ini
       const current = i === 2;
       const Icon    = step.icon;
       return (
-        <div key={step.key} className="flex items-center flex-1">
-          <div className="flex flex-col items-center gap-1.5">
+        <div key={step.key} className={`flex items-start ${i < STEPS.length - 1 ? "flex-1" : ""}`}>
+          <div className="flex flex-col items-center gap-1.5 w-[72px] shrink-0">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
               current
                 ? "bg-[#22c55e] text-[#0c1325] ring-4 ring-[#22c55e]/20"
@@ -44,14 +47,14 @@ const Timeline = () => (
             }`}>
               <Icon size={14} />
             </div>
-            <span className={`text-[10px] font-semibold text-center leading-tight max-w-[60px] ${
+            <span className={`text-[10px] font-semibold text-center leading-tight ${
               current ? "text-[#22c55e]" : active ? "text-slate-300" : "text-slate-600"
             }`}>
               {step.label}
             </span>
           </div>
           {i < STEPS.length - 1 && (
-            <div className={`flex-1 h-0.5 mb-5 mx-1 rounded-full transition-all ${
+            <div className={`flex-1 h-0.5 mt-4 mx-1 rounded-full transition-all ${
               i < 2 ? "bg-[#22c55e]/40" : "bg-[#26314a]"
             }`} />
           )}
@@ -268,7 +271,7 @@ const KonfirmasiDistribusi = () => {
           transition={{ delay: 0.1 }}
         >
           <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-3">Ringkasan Pengiriman</p>
-          <div className="grid grid-cols-2 gap-y-3 gap-x-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3.5 gap-x-4">
             {[
               { icon: FileText, label: "No. Surat Jalan", val: distribusi.noSuratJalan, mono: true },
               { icon: Package,  label: "Produk",          val: distribusi.produk        },
@@ -277,11 +280,13 @@ const KonfirmasiDistribusi = () => {
               { icon: Calendar, label: "Tgl Berangkat",   val: fmtDate(distribusi.tanggalBerangkat) },
               { icon: Calendar, label: "Estimasi Tiba",   val: fmtDate(distribusi.tanggalEstimasi)  },
             ].map(({ icon: Icon, label, val, mono }) => (
-              <div key={label} className="flex items-start gap-2">
-                <Icon size={13} className="text-slate-500 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-[11px] text-slate-500">{label}</p>
-                  <p className={`text-sm text-white font-medium ${mono ? "font-mono" : ""}`}>{val}</p>
+              <div key={label} className="flex items-start gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-[#121b33] flex items-center justify-center shrink-0 mt-0.5">
+                  <Icon size={13} className="text-slate-500" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[11px] text-slate-500 leading-tight">{label}</p>
+                  <p className={`text-sm text-white font-medium truncate ${mono ? "font-mono" : ""}`}>{val}</p>
                 </div>
               </div>
             ))}
@@ -338,7 +343,7 @@ const KonfirmasiDistribusi = () => {
           {/* Kondisi barang */}
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">Kondisi Barang Saat Tiba</label>
-            <div className="flex gap-3">
+            <div className="grid grid-cols-2 gap-3">
               {[
                 { val: "baik",  label: "Baik / Utuh",       color: "border-[#22c55e] bg-[#22c55e]/10 text-[#22c55e]" },
                 { val: "rusak", label: "Ada Kerusakan",      color: "border-amber-500 bg-amber-500/10 text-amber-400" },
@@ -347,7 +352,7 @@ const KonfirmasiDistribusi = () => {
                   key={val}
                   type="button"
                   onClick={() => set("kondisi", val)}
-                  className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border-2 transition-all ${
+                  className={`py-2.5 rounded-xl text-sm font-semibold border-2 transition-all ${
                     form.kondisi === val ? color : "border-[#26314a] text-slate-400 bg-[#121b33]"
                   }`}
                 >

@@ -1,4 +1,4 @@
-import * as svc from "./users.service.js";
+import * as svc from "./user.service.js";
 
 export const getAll   = async (req, res, next) => { try { res.json({ success: true, data: await svc.getAllUsers() }); } catch(e){next(e);} };
 export const getById  = async (req, res, next) => { try { res.json({ success: true, data: await svc.getUserById(+req.params.id) }); } catch(e){next(e);} };

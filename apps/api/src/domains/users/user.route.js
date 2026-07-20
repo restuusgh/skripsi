@@ -1,5 +1,5 @@
 import express from "express";
-import { getAll, getById, create, update, remove } from "./users.controller.js";
+import { getAll, getById, create, update, remove } from "./user.controller.js";
 import { authMiddleware } from "../../middlewares/auth.middleware.js";
 import { roleMiddleware } from "../../middlewares/role.middleware.js";
 

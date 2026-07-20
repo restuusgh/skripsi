@@ -2,24 +2,27 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LogIn,
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  AlertCircle,
-  Loader2,
-  Leaf,
+  LogIn, Mail, Lock, Eye, EyeOff, AlertCircle, Loader2, Leaf,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+
+// Redirect per role setelah login
+const ROLE_HOME = {
+  ADMIN:         "/admin/dashboard",
+  SUPIR:         "/supir/distribusi",
+  KEPALA_GUDANG: "/kepala-gudang/monitoring",
+  PIMPINAN:      "/pimpinan/dashboard",
+};
 
 export default function Login() {
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
+  const { login }   = useAuth();
+  const navigate    = useNavigate();
+
+  const [form, setForm]               = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,23 +34,10 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // Simulasi login - nanti diganti dengan fetch ke API
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      // Contoh validasi sederhana
-      if (form.email === "admin@gmail.com" && form.password === "password123") {
-        localStorage.setItem("token", "dummy-token");
-        localStorage.setItem("user", JSON.stringify({
-          name: "Admin Utama",
-          email: form.email,
-          role: "ADMIN",
-        }));
-        window.location.href = "/admin/dashboard";
-      } else {
-        setError("Email atau password salah.");
-      }
+      const user = await login(form.email, form.password);
+      navigate(ROLE_HOME[user.role] ?? "/", { replace: true });
     } catch (err) {
-      setError("Terjadi kesalahan. Silakan coba lagi.");
+      setError(err.response?.data?.message ?? "Email atau password salah.");
     } finally {
       setLoading(false);
     }
@@ -65,28 +55,13 @@ export default function Login() {
       {/* Floating Orbs */}
       <motion.div
         className="absolute top-20 right-20 w-64 h-64 rounded-full bg-green-500/5 blur-3xl"
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.5, 0.3],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
+        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
         className="absolute bottom-20 left-20 w-96 h-96 rounded-full bg-green-400/5 blur-3xl"
-        animate={{
-          scale: [1, 1.3, 1],
-          opacity: [0.2, 0.4, 0.2],
-        }}
-        transition={{
-          duration: 10,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 1,
-        }}
+        animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.4, 0.2] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
       />
 
       {/* Login Card */}
@@ -97,11 +72,11 @@ export default function Login() {
         className="w-full max-w-md relative z-10"
       >
         <div className="bg-slate-800/90 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-8">
-          {/* Logo / Header */}
+
+          {/* Header */}
           <div className="text-center mb-8">
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.4 }}
               className="flex items-center justify-center gap-3 mb-4"
             >
@@ -111,8 +86,7 @@ export default function Login() {
             </motion.div>
 
             <motion.h1
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.4 }}
               className="text-2xl font-extrabold text-slate-100 tracking-tight"
             >
@@ -120,8 +94,7 @@ export default function Login() {
             </motion.h1>
 
             <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.4 }}
               className="text-sm text-slate-400 mt-1"
             >
@@ -129,19 +102,17 @@ export default function Login() {
             </motion.p>
 
             <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: 60 }}
+              initial={{ width: 0 }} animate={{ width: 60 }}
               transition={{ delay: 0.5, duration: 0.6 }}
               className="h-0.5 bg-gradient-to-r from-green-500 to-transparent mx-auto mt-3 rounded-full"
             />
           </div>
 
-          {/* Error Message */}
+          {/* Error */}
           <AnimatePresence>
             {error && (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
+                initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 mb-4 flex items-start gap-2.5"
               >
@@ -153,15 +124,13 @@ export default function Login() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email Field */}
+
+            {/* Email */}
             <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2, duration: 0.3 }}
             >
-              <label className="block text-xs font-semibold text-slate-400 mb-1.5">
-                Email
-              </label>
+              <label className="block text-xs font-semibold text-slate-400 mb-1.5">Email</label>
               <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
                   <Mail size={18} />
@@ -176,15 +145,12 @@ export default function Login() {
               </div>
             </motion.div>
 
-            {/* Password Field */}
+            {/* Password */}
             <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3, duration: 0.3 }}
             >
-              <label className="block text-xs font-semibold text-slate-400 mb-1.5">
-                Password
-              </label>
+              <label className="block text-xs font-semibold text-slate-400 mb-1.5">Password</label>
               <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
                   <Lock size={18} />
@@ -208,8 +174,7 @@ export default function Login() {
 
             {/* Remember Me */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.3 }}
               className="flex items-center gap-2 text-sm"
             >
@@ -220,12 +185,11 @@ export default function Login() {
               <label className="text-slate-400 cursor-pointer">Ingat saya</label>
             </motion.div>
 
-            {/* Submit Button */}
+            {/* Submit */}
             <motion.button
               type="submit"
               disabled={loading}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.3 }}
               className={`w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center transition-all ${
                 loading
@@ -249,6 +213,10 @@ export default function Login() {
               )}
             </motion.button>
           </form>
+
+          <p className="text-center text-slate-600 text-xs mt-6">
+            © 2026 Sistem Informasi Distribusi Kelapa Sawit
+          </p>
         </div>
       </motion.div>
     </div>

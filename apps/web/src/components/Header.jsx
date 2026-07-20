@@ -44,7 +44,7 @@ export default function Header({ title, subtitle }) {
   const headerTitle = title ?? roleInfo.title;
   const headerSubtitle = subtitle ?? roleInfo.subtitle;
 
-  const displayName = user?.name ?? "Pengguna";
+  const displayName = user?.nama ?? "Pengguna";
   const displayEmail = user?.email ?? "-";
 
   // Tutup dropdown saat klik luar
